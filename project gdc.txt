@@ -1,0 +1,302 @@
+#include <stdio.h>  
+#include <stdlib.h>  
+#include <string.h>
+int task=0,s=0;
+
+struct node
+{  
+    char priority;
+    char taskname[20];
+    int flag;
+    struct node *next;  
+};      
+struct node *head, *tail=NULL;  
+
+int addtask(char filter1,char filter2[]) //adds a single tasks
+{  
+    if(filter1=='-' || filter1==' ' || strcmp(filter2,"-")==0 || strcmp(filter2," ")==0)
+    {
+       printf("invalid argument provided for add\n"); //shows error message when add is not followed by a task
+       return 0;
+    }
+    struct node *newNode=(struct node*)malloc(sizeof(struct node));  
+    newNode->priority=filter1;  
+    strcpy(newNode->taskname,filter2);
+    newNode->flag=0;
+    newNode->next=NULL;  
+    if(task==0)
+    {  
+        head=newNode;  
+        tail=newNode;  
+    }  
+    else
+    {  
+        tail->next=newNode;  
+        tail=newNode;  
+        
+    }  
+    task++;
+    return 1;
+}  
+
+void sortlinked() //sorts tasks in order of priority
+{
+    struct node *current = head, *index = NULL;  
+    char string[20],temp;
+    int x;
+    if(head == NULL)
+      return;  
+    else
+    {  
+        while(current != NULL) 
+        {  
+            index=current->next;  
+            while(index != NULL)
+            {  
+                if(current->priority>index->priority) 
+                {  
+                    temp=current->priority;  
+                    current->priority=index->priority;  
+                    index->priority=temp;  
+                    strcpy(string,current->taskname);
+                    strcpy(current->taskname,index->taskname);
+                    strcpy(index->taskname,string);
+                    x=current->flag;
+                    current->flag=index->flag;
+                    index->flag=x;
+                }  
+                index = index->next;  
+            }  
+            current = current->next;  
+        }      
+    }  
+}
+
+void display() 
+{  
+    int i=0;
+    struct node *current;
+    current=head;  
+    if(head==NULL)
+    {  
+        printf("List is empty\n");  //list when there are no remaining tasks
+        return;  
+    }  
+    printf("taskno taskname  priority\n");  
+    while(current!=NULL) 
+    {  
+        if(current->flag==1)
+           printf("  %d.   %s      done\n",i+1,current->taskname); 
+        else 
+           printf("  %d.   %s      %c\n",i+1,current->taskname,current->priority); 
+        current=current->next;  
+        i++;
+    }  
+}  
+
+int done(int filter) //mark a task as done 
+{
+    struct node *search;  
+    int i=1,sign=1;  
+    search=head;   
+    if(search==NULL)  
+    {  
+        printf("Empty List\n");  
+        return sign;
+    }  
+    else if(filter==('-' - '0') || filter==(' ' - '0')) //mark as done without providing a task number
+    {
+        filter=1;
+        s=1;
+    }
+    else if(filter>task || filter<1)
+    {
+        printf("item to be marked does not exist\n"); //mark a task as done that does not exist
+        return sign;
+    }
+        while (search!=NULL)  
+        {  
+            if(i==filter)  
+            {  
+                if(search->flag==0)
+                {
+                    search->flag=1;
+                    sign=0;  
+                    return sign;
+                }
+                else if(search->flag==1)
+                {
+                    search->flag=0;
+                    sign=1;  
+                    return sign;
+                }
+            }   
+            i++;  
+            search=search->next;  
+        }  
+       
+    return sign;
+}
+
+int delete(int filter,char filter2[]) //delete a task
+{
+    
+    struct node *del, *del1;  
+    int i;   
+    if(head==NULL)
+    {
+        printf("item does not exist\n");
+        return 0;
+    }
+    else if(filter==('-' - '0') || filter==(' ' - '0') || strcmp(filter2,"-")==0 || strcmp(filter2," ")==0)
+    {
+       printf("invalid argument provided for delete\n"); //delete does not have enough arguments
+       return 0;
+    }
+    else if(filter>task || filter<1)
+    {
+        printf("item to be deleted does not exist\n"); //deletes a non-existent tasks
+        return 0;
+    }
+    if(filter==1)
+    {
+        if(task==1)
+        {
+            head=NULL;
+            task--;
+            return 1;
+        }
+        head=head->next;
+        task--;
+        return 1;
+    }
+    del=head;
+    for (i=0;i<filter-1; i++)
+    {
+        del1=del;
+        del = del->next;
+    }
+    
+    del1->next = del->next;
+    task--;
+    return 1;
+}
+
+void report() //report pending and complete tasks
+{
+    struct node *rep;
+    rep=head;
+    int i,pcount=0,ccount=0;
+    if(task==0)
+    {
+      printf("LIST EMPTY\n");
+      return;
+    } 
+    printf("Pending Tasks\n");
+    for(i=0;i!=task;i++)
+    {
+        if(rep->flag==1)
+        {
+            rep=rep->next;
+            continue;
+        }
+        printf("%d.  %s  \n",i+1,rep->taskname); 
+        rep=rep->next;
+        pcount++;
+    }
+    if(pcount==0)
+       printf("0\n");
+    rep=head;
+    printf("Completed Tasks\n");
+    for(i=0;i!=task;i++)
+    {
+        if(rep->flag==0)
+        {
+            rep=rep->next;
+            continue;
+        }
+        printf("%d.  %s  \n",i+1,rep->taskname); 
+        rep=rep->next;
+        ccount++;
+    }
+    if(ccount==0)
+       printf("0\n");
+}
+
+int getcode(char command[])
+{
+    if(strcmp(command,"ADD")==0||strcmp(command,"add")==0)
+       return 1;
+    if(strcmp(command,"LS")==0||strcmp(command,"ls")==0)
+       return 2;
+    if(strcmp(command,"DONE")==0||strcmp(command,"done")==0)
+       return 3;
+    if(strcmp(command,"DEL")==0||strcmp(command,"del")==0)
+       return 4;
+    if(strcmp(command,"HELP")==0||strcmp(command,"help")==0)
+       return 5;
+    if(strcmp(command,"REPORT")==0||strcmp(command,"report")==0)
+       return 6;
+    if(strcmp(command,"EXIT")==0||strcmp(command,"exit")==0)
+       return 7;
+}
+void main()  
+{  
+    char command[10],filter2[20],filter1;
+    int code,sign,c,z,m,a;
+    for(;;)
+    {
+      printf("COMMAND USAGE LIST\n"); //prints help
+      printf("add 2 hello world   #adds a new item to the task list of name hello world and of priority from 2 of range*0-9*\n");
+      printf("ls - -              #shows the task list along with priority arranged in order of ascending priority\n");
+      printf("done 2 2            #marks a task with task number 2 of range 1-10 as completed for 2 times with a range of 1-9\n");
+      printf("del 3 -             #deletes the task with task number 3 from the list \n");
+      printf("help - -            #displays usage\n");
+      printf("report - -          #displays the statistics\n");
+      printf("Exit - -            #exits the command tool");
+      printf("Enter your next command from the usage with all three arguments\n");
+      scanf("%s %c %[^\n]",command,&filter1,filter2);
+      code=getcode(command);
+      switch(code)
+      {
+         case 1 :z=addtask(filter1,filter2); //adds multiple tasks
+                 if(z==1)
+                 printf("added task %d: %s of priority %c\n\n",task,filter2,filter1);
+                 break;
+         case 2 :sortlinked();
+                 display();
+                 printf("\n");
+                 break;
+         case 3 :sign=done(filter1-'0');
+                 if(sign==1)  
+                   printf("Item not found or item unmarked\n");  
+                 else if(sign==0 && s==0)  
+                   printf("task %c marked as done\n",filter1);  
+                 else if(sign==0 && s==1)
+                   printf("task 1 marked as done\n"); 
+                 printf("\n");
+                 break;
+         case 4 :if(strcmp(filter2," ")==0 || strcmp(filter2,"-")==0)
+                  m=1;
+                 else
+                  m=filter2[0]-'0';
+                 for(c=0;c<m;c++) //deletes a task multiple times
+                     a=delete(filter1-'0',filter2);//delete tasks numbered 3, 2, 1 and delete first 3 tasks 
+                 if(a==1)
+                   printf("task deleted from list\n");
+                 printf("\n");
+                 break;
+         case 5 :printf("\n"); //prints help when no additional args are provided
+                 break;
+         case 6 :report();
+                 printf("\n");
+                 break;
+         case 7 :printf("You have reached the end of the program");
+                 exit(0);
+                 break;
+         default:printf("invalid command please try again:)\n");
+                 printf("\n");
+                 continue;
+      }
+}
+}  
