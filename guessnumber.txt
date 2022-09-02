@@ -1,0 +1,144 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<time.h>
+int point=0;
+int generate(int x)
+{
+    time_t t1;
+    srand ( (unsigned) time (&t1));
+    int num;
+    if(x==2)
+    {
+        num = rand()%100 ;
+        while(num>99)
+        {
+            num = rand() % 100 ;
+        }
+    }
+    if(x==3)
+    {
+        num = rand()%1000 ;
+        while(num>999)
+        {
+            num = rand() % 1000 ;
+        }
+    }
+
+    return num;
+
+}
+int guess2(int num)
+{
+    int i,guess2;
+    for(i=1;i<=10;i++)
+    {
+        printf("Enter your %d guess for the 2 digit Number from 10-99\n",i);
+        scanf("%d",&guess2);
+        if(guess2>9 && guess2<100)
+        {
+         if(guess2==num)
+         {
+            printf("You guessed it right in %d guesses!!\nThe Number was %d\n",i,num);
+            printf("You earned a point for the win\n");
+            point++;
+            return 1;
+         }
+         else if(guess2<num)
+            printf("The Guessed Number is low\n");
+         else if(guess2>num)
+            printf("The Guessed Number is high\n");
+        }
+        else
+            printf("Invalid input\n");
+        printf("You have %d guesses left\n",(10-i));
+        printf("----------------------------------------------------\n");
+    }
+    return 0;
+}
+void array(int n,int arr[])
+{
+    int i,c;
+    for(i=2;i>=0;i--)
+    {
+        c=n%10;
+        n/=10;
+        arr[i]=c;
+    }
+}
+int guess3(int num)
+{
+    int i,guess3,digits,pos,numarray[3],guessarray[3],j,k;
+    for(i=1;i<=10;i++)
+    {
+        digits=pos=0;
+        printf("Enter your %d guess for the 3 digit Number from 100-999\n",i);
+        scanf("%d",&guess3);
+        if(guess3>99 && guess3<1000)
+        {
+           array(guess3,guessarray);
+           array(num,numarray);
+           for(j=0;j<3;j++)
+           {
+               if(numarray[j]==guessarray[j])
+               {
+                   guessarray[j]=numarray[j]=-1;
+                   pos++;
+                   digits++;
+                   continue;
+               }
+               for(k=0;k<3;k++)
+               {
+                   if(guessarray[k]==-1 || numarray[j]==-1)
+                       continue;
+                   if(numarray[j]==guessarray[k])
+                   {
+                       digits++;
+                       guessarray[k]=numarray[j]=-1;
+                       continue;
+                   }
+               }
+           }
+           if(digits==3 && pos==3)
+           {
+              printf("You guessed it right in %d guesses!!\nThe Number was %d\n",i,num);
+              printf("You earned a point for the win\n");
+              point++;
+              return 1;
+           }
+           else if(pos<3)
+              printf("The guessed Number had %d digits and %d positions right\n",digits,pos);
+        }
+        else
+            printf("Invalid input\n");
+        printf("You have %d guesses left\n",(10-i));
+        printf("----------------------------------------------------\n");
+    }
+    return 0;
+}
+void main()
+{
+    int ch,num2,i,num3,flag,y;
+    for(;;)
+    {
+        printf("----------------------------------------------------\nGuess The Number Game\nYou have will have guess a number\nYou will be given 10 chances\nIf you dont guess the number with the chances you lose.GOOD LUCK!\n----------------------------------------------------\n1.2 digit Number\n2.3 digit Number\n3.Exit the game\n");
+        printf("Enter your choice\n");
+        scanf("%d",&ch);
+        switch(ch)
+        {
+            case 1:y=2;
+                    num2=generate(y);
+                    flag=guess2(num2);
+                    if(flag==0)
+                    printf("You are out of guesses\nGame Over\nThe Number was %d\n \n",num2);
+                    break;
+            case 2:y=3;
+                    num3=generate(y);
+                    flag=guess3(num3);
+                    if(flag==0)
+                    printf("You are out of guesses\nGame Over\nthe number was %d\n \n",num3);
+                    break;
+            case 3:printf("You earned a total of %d points\nend of program",point);
+                    exit(0);
+        }
+    }
+}
